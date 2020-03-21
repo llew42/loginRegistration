@@ -6,7 +6,7 @@ const { body, check, validationResult } = require('express-validator');
 
 const User = require('../models/user');
 
-router.get('/', (req, res) => {
+router.get('/', ensureAuthentication, (req, res) => {
   res.render('index');
 });
 
@@ -104,11 +104,12 @@ router.get('/logout', (req, res) => {
 });
 
 // ACCESS CONTROL
-const ensureAuthentication = (req, res, next) => {
+function ensureAuthentication(req, res, next){
   if (req.isAuthenticated()) {
     return next();
   }
   else {
+    req.flash('errorMsg', 'You need to be logged in to view this page');
     res.redirect('/login');
   }
 };
