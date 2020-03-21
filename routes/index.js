@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 const { body, check, validationResult } = require('express-validator');
 
 const User = require('../models/user');
@@ -56,5 +58,59 @@ router.post('/register',
     });
   }
 });
+
+// LOCAL STRATEGY
+passport.use(new LocalStrategy((username, password, done) => {
+  User.getUserByUsername(username, (err, user) => {
+    if (err) throw err;
+    if (!user) {
+      return done(null, false, {message: 'Username not found'});
+    }
+    User.comparePassword(password, user.password, (err, isMatch) => {
+      if (err) throw err;
+      if (isMatch) {
+        return done(null, user);
+      }
+      else {
+        return done(null, false, {message: 'Invalid password'});
+      }
+    });
+  });
+}));
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+  User.getUserById(id, (err, user) => {
+    done(err, user);
+  });
+});
+
+// LOGIN WITH PASSPORT
+router.post('/login', (req, res) => {
+  passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/login',
+    failureFlash: true
+  })(req, res);
+});
+
+router.get('/logout', (req, res) => {
+  req.logout();
+  req.flash('successMsg', 'You have been logged out');
+  res.redirect('/login');
+});
+
+// ACCESS CONTROL
+const ensureAuthentication = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  else {
+    res.redirect('/login');
+  }
+};
 
 module.exports = router;

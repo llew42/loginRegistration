@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const exphbs = require('express-handlebars')
 const session = require('express-session');
 const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 const path = require('path');
 const flash = require('connect-flash');
 const expressValidator = require('express-validator');
@@ -30,10 +31,15 @@ app.use(session({
   saveUninitialized: true
 }));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(flash());
 app.use((req, res, next) => {
   res.locals.successMsg = req.flash('successMsg');
   res.locals.errorMsg = req.flash('errorMsg');
+  res.locals.error = req.flash('error');
+  res.locals.user = req.user || null;
   next();
 });
 

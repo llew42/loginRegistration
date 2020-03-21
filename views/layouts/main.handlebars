@@ -11,6 +11,9 @@
   {{#if errorMsg}}
     <div class="alert alert-danger">{{errorMsg}}</div>
   {{/if}}
+  {{#if error}}
+    <div class="alert alert-danger">{{error}}</div>
+  {{/if}}
   {{#if errors}}
     {{#each errors}}
       <div class="alert alert-danger">{{msg}}</div>
