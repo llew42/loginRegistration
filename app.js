@@ -8,7 +8,6 @@ const path = require('path');
 const flash = require('connect-flash');
 const expressValidator = require('express-validator');
 
-mongoose.connect('mongodb://localhost/passportLogin');
 const db = mongoose.connection;
 
 const port = 3000;
@@ -31,9 +30,10 @@ app.use(session({
   saveUninitialized: true
 }));
 
-app.use(require('connect-flash')());
+app.use(flash());
 app.use((req, res, next) => {
-  res.locals.messages = require('express-messages')(req, res);
+  res.locals.successMsg = req.flash('successMsg');
+  res.locals.errorMsg = req.flash('errorMsg');
   next();
 });
 

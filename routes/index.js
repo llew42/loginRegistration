@@ -2,12 +2,18 @@ const express = require('express');
 const router = express.Router();
 const { body, check, validationResult } = require('express-validator');
 
+const User = require('../models/user');
+
 router.get('/', (req, res) => {
   res.render('index');
 });
 
 router.get('/register', (req, res) => {
   res.render('register');
+});
+
+router.get('/login', (req, res) => {
+  res.render('login');
 });
 
 router.post('/register',
@@ -23,19 +29,31 @@ router.post('/register',
   })
 ], (req, res) => {
 
+  const name = req.body.name;
+  const username = req.body.username;
+  const email = req.body.email;
+  const password = req.body.password;
+  const confirmPassword = req.body.confirmPassword;
+
   const errors = validationResult(req);
-  if (errors) {
+  if (!errors.isEmpty()) {
     res.render('register', {errors: errors.array()});
-    console.log(errors);
   }
   else {
-    console.log('SUCCESS');
-    return;
-    // const name = req.body.name;
-    // const username = req.body.username;
-    // const email = req.body.email;
-    // const password = req.body.password;
-    // const confirmPassword = req.body.confirmPassword;
+    const newUser = new User({
+      name: name,
+      username: username,
+      email: email,
+      password:password
+    });
+
+    User.registerUser(newUser, (err, user) => {
+      if (err) {
+        throw err;
+      }
+      req.flash('successMsg', 'You have been successfullly registered');
+      res.redirect('/login');
+    });
   }
 });
 
